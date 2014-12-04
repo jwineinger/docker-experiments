@@ -25,12 +25,9 @@ def copy_file_via_docker(client, image_name, src_path, dest_path):
     for line in client.pull(image_name, stream=True):
         print(json.dumps(json.loads(line), indent=4))
 
-    # Setup the paths that will be given to the copy command as the src and destination. To do that,
-    # choose where to mount the host filesystem within the container. Then prepend that mount point to
-    # the `src_path` and `dest_path` arguments so that they are valid within the container (assuming that the
-    # original given paths are valid on the host).
-    # Mounting / is not the best idea but for the sake of this demo script, we're going to do it so that any path
-    # given can be copied if it is valid on the host
+    # Choose what path to mount from the host filesystem and where to mount it within the container. Mounting / is not
+    # the best idea but for the sake of this demo script, we're going to do it so that any path given can be copied if
+    # it is valid on the host
     host_path = '/'
     mount_point = '/mnt/host'
 
