@@ -34,10 +34,13 @@ def copy_file_via_docker(client, image_name, src_path, dest_path):
     host_path = '/'
     mount_point = '/mnt/host'
 
-    # Strip off the leading char of src_path and dest_path because it will be a slash, and os.path.join() will lose
-    # the mount_point prefix if the second part starts with a slash.
-    src = os.path.join(mount_point, src_path[1:])
-    dest = os.path.join(mount_point, dest_path[1:])
+    # Setup the paths that will be given as arguments to the copy command by prepending the chosen mount point to
+    # the `src_path` and `dest_path` arguments to make them valid within the container (assuming that the original
+    # given paths are valid on the host).
+    # Strip off any leading slash on `src_path` and `dest_path` because os.path.join() will lose the mount_point prefix
+    # if the second part starts with a slash.
+    src = os.path.join(mount_point, src_path.lstrip("/"))
+    dest = os.path.join(mount_point, dest_path.lstrip("/"))
 
     # set up the `cp` command using the paths under the mount-point
     cmd = ["cp", src, dest]
