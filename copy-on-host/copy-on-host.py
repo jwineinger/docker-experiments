@@ -2,7 +2,7 @@
 Python CLI script to copy a file on a Docker host from within a container.
 """
 from __future__ import print_function
-
+import argparse
 import json
 import os.path
 
@@ -77,26 +77,13 @@ def setup_client():
     return Client(**kwargs_from_env())
 
 
-def main(**kwargs):
+def main():
     """
     Copies a file using a Docker container and prints the exit code and any output (stdout and/or stderr) produced
     by that command.
-    
+
     :return: None
     """
-    exit_code, stdout, stderr = copy_file_via_docker(client=setup_client(), **kwargs)
-
-    print("-" * 30)
-    print("Exit Code: {code}".format(code=exit_code))
-    if stdout:
-        print("Stdout:\n{out}".format(out=stdout))
-    if stderr:
-        print("Stderr:\n{err}".format(err=stderr))
-
-
-if __name__ == '__main__':
-    import argparse
-
     def full_path(path):
         """Converts path arguments to full absolute paths, expanding user shortcuts if given"""
         return os.path.abspath(os.path.expanduser(path))
@@ -107,4 +94,16 @@ if __name__ == '__main__':
     parser.add_argument('-i', '--image', default='ubuntu:14.04', help='Docker image to use')
     args = parser.parse_args()
 
-    main(image_name=args.image, src_path=args.src_path, dest_path=args.dest_path)
+    exit_code, stdout, stderr = copy_file_via_docker(client=setup_client(), image_name=args.image,
+                                                     src_path=args.src_path, dest_path=args.dest_path)
+
+    print("-" * 30)
+    print("Exit Code: {code}".format(code=exit_code))
+    if stdout:
+        print("Stdout:\n{out}".format(out=stdout))
+    if stderr:
+        print("Stderr:\n{err}".format(err=stderr))
+
+
+if __name__ == '__main__':
+    main()
