@@ -1,3 +1,6 @@
+"""
+Python CLI script to copy a file on a Docker host from within a container.
+"""
 from __future__ import print_function
 
 import json
