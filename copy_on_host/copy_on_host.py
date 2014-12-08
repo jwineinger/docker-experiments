@@ -44,7 +44,7 @@ def configure_logging():
                 'propagate': False,
             },
         }
-    })    
+    })
 
 
 def copy_file_via_docker(client, image_name, src_path, dest_path):
