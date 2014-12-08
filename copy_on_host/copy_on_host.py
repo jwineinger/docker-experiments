@@ -144,8 +144,8 @@ def main():
     parser = argparse.ArgumentParser(description='Copy a file from within a docker container')
     parser.add_argument('src_path', help='The path of the file on the host to copy.', type=full_path)
     parser.add_argument('dest_path', help='The path on the host to copy the file to.', type=full_path)
-    parser.add_argument('-i', '--image', default='ubuntu:14.04', help='Docker image to use')
-    parser.add_argument('-v', '--verbose', action='store_true', help='Increase logging level (from INFO to DEBUG)')
+    parser.add_argument('--image', default='ubuntu:14.04', help='Docker image to use')
+    parser.add_argument('--verbose', action='store_true', help='Increase logging level (from INFO to DEBUG)')
     args = parser.parse_args()
 
     if args.verbose:
