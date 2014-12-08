@@ -16,6 +16,7 @@ LOG = logging.getLogger(__name__)
 
 
 def configure_logging():
+    """Configures logging handlers for running as a script. Prints INFO and above to console by default."""
     logging.config.dictConfig({
         'version': 1,
         'disable_existing_loggers': True,
