@@ -61,49 +61,48 @@ def copy_file_via_docker(client, image_name, src_path, dest_path):
     """
     # Use the Docker client to pull a given image name. Downloading images can take a long time depending on the
     # size of the image and the user's network bandwidth. Download progress can be seen in verbose mode
-    LOG.info("pulling docker image '{image}'".format(image=image_name))
+    LOG.info("pulling docker image '%s'", image_name)
     for line in client.pull(image_name, stream=True):
         data = json.loads(line)
         if data['status'].lower() == 'downloading':
-            LOG.debug("{id}: {progress}".format(**data))
+            LOG.debug("%s: %s", data['id'], data['progress'])
         elif 'id' in data:
-            LOG.debug("{id}: {status}".format(**data))
+            LOG.debug("%s: %s", data['id'], data['status'])
         else:
-            LOG.debug("{status}".format(**data))
+            LOG.debug("%s", data['status'])
 
     # Choose what path to mount from the host filesystem and where to mount it within the container. Mounting / is not
     # the best idea but for the sake of this demo script, we're going to do it so that any path given can be copied if
     # it is valid on the host
     host_path = '/'
     mount_point = '/mnt/host'
-    LOG.info("host filesystem '{host}' will be mounted at '{mount}'".format(host=host_path, mount=mount_point))
+    LOG.debug("host filesystem '%s' will be mounted at '%s'", host_path, mount_point)
 
     # Setup the paths that will be given as arguments to the copy command by prepending the chosen mount point to
     # the `src_path` and `dest_path` arguments to make them valid within the container (assuming that the original
     # given paths are valid on the host).
     # Strip off any leading slash on `src_path` and `dest_path` because os.path.join() will lose the mount_point prefix
     # if the second part starts with a slash.
-    src = os.path.join(mount_point, src_path.lstrip("/"))
-    LOG.debug("src path: '{path}'".format(path=src))
-    dest = os.path.join(mount_point, dest_path.lstrip("/"))
-    LOG.debug("dest path: '{path}'".format(path=dest))
+    src_path = os.path.join(mount_point, src_path.lstrip("/"))
+    LOG.debug("src path: '%s'", src_path)
+    dest_path = os.path.join(mount_point, dest_path.lstrip("/"))
+    LOG.debug("dest path: '%s'", dest_path)
 
     # set up the `cp` command using the paths under the mount-point
-    cmd = ["cp", src, dest]
-    LOG.debug("command = '{cmd}'".format(cmd=" ".join(cmd)))
+    cmd = ["cp", "-v", src_path, dest_path]
+    LOG.debug("command = '%s'", " ".join(cmd))
 
     LOG.debug("creating container")
     container = client.create_container(image=image_name, command=cmd, volumes=[mount_point])
 
     # start the container and bind the host's filesystem to the mount point
-    LOG.info("starting container")
+    LOG.info("starting container id=%s", container['Id'])
     client.start(container=container, binds={host_path: {'bind': mount_point, 'ro': False}})
 
     # wait until the command is complete and get its exit code
     LOG.debug("waiting until command is complete")
     exit_code = client.wait(container)
-    LOG.log(msg="exit code was {exit}".format(exit=exit_code),
-            level=logging.WARNING if exit_code > 0 else logging.DEBUG)
+    LOG.log(logging.WARNING if exit_code > 0 else logging.DEBUG, "exit code was %i", exit_code)
 
     # get the stdout and stderr of the command. it does seem that we can get stdout and stderr separately,
     # but that has the downside that we would lose the output order. The next line could be used instead to
