@@ -108,9 +108,9 @@ def copy_file_via_docker(client, image_name, src_path, dest_path):
     # but that has the downside that we would lose the output order. The next line could be used instead to
     # get stdout and stderr interleaved together and maintain output order.
     # output = client.logs(container, stdout=True, stderr=True)
-    LOG.debug("getting stdout")
+    LOG.debug("collecting stdout")
     stdout = client.logs(container, stdout=True, stderr=False).strip()
-    LOG.debug("getting stderr")
+    LOG.debug("collecting stderr")
     stderr = client.logs(container, stdout=False, stderr=True).strip()
 
     return exit_code, stdout, stderr
